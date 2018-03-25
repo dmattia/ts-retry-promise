@@ -24,7 +24,7 @@ describe("Retry Promise", () => {
     it("should not alter config", async () => {
         const failer = new Failer(1);
 
-        const config: RetryConfig<any> = {
+        const config: RetryConfig = {
             retries: 3,
         };
 

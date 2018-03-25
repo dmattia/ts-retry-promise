@@ -9,7 +9,7 @@ _retry for functions returning a promise_
 
 
 ```typescript
-function retry<T>(f: () => Promise<T>, config?: RetryConfig<T>): Promise<T> {}
+function retry<T>(f: () => Promise<T>, config?: RetryConfig): Promise<T> {}
 ```
 
 _retry_ will repeatedly call _f_ until a resolved _Promise_ is returned. 
@@ -18,7 +18,7 @@ Optionally a predicate can be specified, against which the result will be checke
 Several aspects of the execution can be configured:
 
 ```typescript
-export interface RetryConfig<T> {
+export interface RetryConfig {
     // number of maximal retry attempts (default: 10)
     retries?: number | "INFINITELY";
 
@@ -26,7 +26,7 @@ export interface RetryConfig<T> {
     delay?: number;
 
     // check the result, will retry until true (default: () => true)
-    until?: (t: T) => boolean;
+    until?: (t: any) => boolean;
 
     // log events (default: () => undefined)
     logger?: (msg: string) => void;

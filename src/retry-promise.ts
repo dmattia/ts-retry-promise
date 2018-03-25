@@ -1,6 +1,6 @@
 import {isArray, isNullOrUndefined} from "util";
 
-export interface RetryConfig<T> {
+export interface RetryConfig {
     // number of maximal retry attempts (default: 10)
     retries?: number | "INFINITELY";
 
@@ -8,7 +8,7 @@ export interface RetryConfig<T> {
     delay?: number;
 
     // check the result, will retry until true (default: () => true)
-    until?: (t: T) => boolean;
+    until?: (t: any) => boolean;
 
     // log events (default: () => undefined)
     logger?: (msg: string) => void;
@@ -27,7 +27,7 @@ const fixedBackoff = (attempt: number, delay: number) => delay;
 const linearBackoff = (attempt: number, delay: number) => attempt * delay;
 const exponentialBackoff = (attempt: number, delay: number) => Math.pow(delay, attempt);
 
-export const defaultRetryConfig: RetryConfig<any> = {
+export const defaultRetryConfig: RetryConfig = {
     backoff: "FIXED",
     delay: 100,
     logger: () => undefined,
@@ -41,7 +41,7 @@ export async function wait(ms: number): Promise<void> {
     return new Promise<void>((resolve) => setTimeout(resolve, ms));
 }
 
-export async function retry<T>(f: () => Promise<T>, config?: RetryConfig<T>): Promise<T> {
+export async function retry<T>(f: () => Promise<T>, config?: RetryConfig): Promise<T> {
     config = Object.assign({}, defaultRetryConfig, config);
 
     switch (config.backoff) {
@@ -67,14 +67,14 @@ export async function retry<T>(f: () => Promise<T>, config?: RetryConfig<T>): Pr
 }
 
 // tslint:disable-next-line
-export function customizeRetry<T>(customConfig: RetryConfig<T>): <T>(f: () => Promise<T>, config?: RetryConfig<T>) => Promise<T> {
+export function customizeRetry<T>(customConfig: RetryConfig): <T>(f: () => Promise<T>, config?: RetryConfig) => Promise<T> {
     return (f, c) => {
         const customized = Object.assign({}, customConfig, c);
         return retry(f, customized);
     };
 }
 
-async function _retry<T>(f: () => Promise<T>, config: RetryConfig<T>, canceled: Promise<void>): Promise<T> {
+async function _retry<T>(f: () => Promise<T>, config: RetryConfig, canceled: Promise<void>): Promise<T> {
     let latestError: Error;
     let stop = false;
     const delay = config.backoff as (attempt: number, delay: number) => number;
